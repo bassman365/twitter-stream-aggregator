@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TwitterStreamAggregator.Clients;
+using TwitterStreamAggregator.HostedServices;
 
 namespace TwitterStreamAggregator
 {
@@ -32,6 +34,9 @@ namespace TwitterStreamAggregator
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TwitterStreamAggregator", Version = "v1" });
             });
+            
+            StartupClients.ConfigureServices(services, Configuration);
+            services.AddHostedService<TweetCreationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
