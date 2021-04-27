@@ -1,4 +1,4 @@
-﻿namespace TwitterStreamAggregator.Models
+﻿namespace TwitterStreamService.Models
 {
     public class TweetData
     {

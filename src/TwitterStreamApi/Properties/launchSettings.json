@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "TwitterStreamAggregator": {
+    "TwitterStreamApi": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,

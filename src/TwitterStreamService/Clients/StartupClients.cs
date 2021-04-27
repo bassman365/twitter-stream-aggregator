@@ -6,7 +6,7 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
-namespace TwitterStreamAggregator.Clients
+namespace TwitterStreamService.Clients
 {
     public static class StartupClients
     {
@@ -14,7 +14,8 @@ namespace TwitterStreamAggregator.Clients
         {
             services.AddHttpClient<ITwitterClient, TwitterClient>(client =>
             {
-                client.BaseAddress = new Uri(configuration["Twitter:BaseUrl"]);
+                var url = configuration["Twitter:BaseUrl"];
+                client.BaseAddress = new Uri(url);
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Bearer",

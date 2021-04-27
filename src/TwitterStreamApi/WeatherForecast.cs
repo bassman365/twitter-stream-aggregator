@@ -1,6 +1,6 @@
 using System;
 
-namespace TwitterStreamAggregator
+namespace TwitterStreamApi
 {
     public class WeatherForecast
     {

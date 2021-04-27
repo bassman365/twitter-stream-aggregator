@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TwitterStreamAggregator.Clients
+namespace TwitterStreamService.Clients
 {
     public class TwitterClient : ITwitterClient
     {
