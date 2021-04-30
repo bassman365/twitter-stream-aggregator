@@ -4,6 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System.Threading.Channels;
+using TwitterStreamApi.Clients;
+using TwitterStreamApi.Models;
 
 namespace TwitterStreamApi
 {
@@ -24,10 +27,14 @@ namespace TwitterStreamApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TwitterStreamApi", Version = "v1" });
             });
-            
-            //StartupClients.ConfigureServices(services, Configuration);
-            //services.AddHostedService<TweetCreationService>();
-            //services.AddSingleton<TweetStreamProcessor>();
+
+            StartupClients.ConfigureServices(services, Configuration);
+            services.AddHostedService<TweetConsumer>();
+            var channel = Channel.CreateUnbounded<Tweet>();
+            services.AddSingleton(channel.Reader);
+            services.AddSingleton(channel.Writer);
+            services.AddSingleton<TweetStreamProducer>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

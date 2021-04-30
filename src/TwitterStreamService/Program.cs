@@ -1,12 +1,15 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using TwitterStreamService.Clients;
+using TwitterStreamService.Models;
 
 namespace TwitterStreamService
 {
@@ -36,65 +39,23 @@ namespace TwitterStreamService
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddSingleton<TweetStreamProcessor>();
+                    services.AddSingleton<TweetStreamProducer>();
                     StartupClients.ConfigureServices(services, hostContext.Configuration);
-                    services.AddHostedService<Worker>();
+                    services.AddHostedService<TweetConsumerManager>();
+                    var channel = Channel.CreateUnbounded<Tweet>();
+                    services.AddSingleton(channel.Reader);
+                    services.AddSingleton(channel.Writer);
+                    services.AddDbContext<TweetStatsContext>(
+                        config => config.UseInMemoryDatabase("TweetStats"));
                 })
                 .Build();
 
             await host.StartAsync();
 
-            var tweetStreamProcessor = host.Services.GetRequiredService<TweetStreamProcessor>();
+            var tweetStreamProcessor = host.Services.GetRequiredService<TweetStreamProducer>();
             tweetStreamProcessor.Run();
 
-            await host.WaitForShutdownAsync();
-            //.ConfigureAppConfiguration((hostingContext, config) =>
-            //{
-            //    config.AddJsonFile(
-            //        "appsettings.Local.json",
-            //         optional: true,
-            //         reloadOnChange: true);
-
-            //    config.AddJsonFile(
-            //        "appsettings.json",
-            //        optional: true,
-            //        reloadOnChange: true);
-
-            //    config.AddJsonFile(
-            //        $"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json",
-            //        optional: true,
-            //        reloadOnChange: true);
-            //})
-            //.ConfigureServices((hostContext, services) =>
-            //{
-            //    StartupClients.ConfigureServices(services, hostContext.Configuration);
-            //    services.AddHostedService<Worker>();
-            //});
+            await host.WaitForShutdownAsync();  
         }
-
-        //public static IHostBuilder CreateHostBuilder(string[] args) =>
-        //    Host.CreateDefaultBuilder(args)
-        //        .ConfigureAppConfiguration((hostingContext, config) =>
-        //        {
-        //            config.AddJsonFile(
-        //                "appsettings.Local.json",
-        //                 optional: true,
-        //                 reloadOnChange: true);
-                    
-        //            config.AddJsonFile(
-        //                "appsettings.json", 
-        //                optional: true,
-        //                reloadOnChange: true);
-
-        //            config.AddJsonFile(
-        //                $"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", 
-        //                optional: true,
-        //                reloadOnChange: true);
-        //        })
-        //        .ConfigureServices((hostContext, services) =>
-        //        {
-        //            StartupClients.ConfigureServices(services, hostContext.Configuration);
-        //            services.AddHostedService<Worker>();                 
-        //        });
     }
 }

@@ -4,31 +4,35 @@ using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using TwitterStreamService.Clients;
-using TwitterStreamService.Models;
+using TwitterStreamApi.Clients;
+using TwitterStreamApi.Models;
 
-namespace TwitterStreamService
+namespace TwitterStreamApi
 {
-    public class TweetStreamProcessor
+    public class TweetStreamProducer
     {
         private readonly CancellationToken cancellationToken;
-        private readonly ILogger<TweetStreamProcessor> logger;
+        private readonly ILogger<TweetStreamProducer> logger;
         private readonly ITwitterClient twitterClient;
+        private readonly ChannelWriter<Tweet> channelWriter;
 
-        public TweetStreamProcessor(
+        public TweetStreamProducer(
             IHostApplicationLifetime applicationLifetime,
-            ILogger<TweetStreamProcessor> logger,
-            ITwitterClient twitterClient)
+            ILogger<TweetStreamProducer> logger,
+            ITwitterClient twitterClient,
+            ChannelWriter<Tweet> channelWriter)
         {
             cancellationToken = applicationLifetime.ApplicationStopping;
             this.logger = logger;
             this.twitterClient = twitterClient;
+            this.channelWriter = channelWriter;
         }
 
         public void Run()
         {
-            logger.LogInformation($"{nameof(TweetStreamProcessor)} starting...");
+            logger.LogInformation($"{nameof(TweetStreamProducer)} starting...");
             Task.Run(async () => await ProcessTweetStream());
         }
 
@@ -39,7 +43,7 @@ namespace TwitterStreamService
                 if (stream == null)
                 {
                     logger.LogError(
-                        $"{nameof(TweetStreamProcessor)} failed to get tweet stream, stopping...");
+                        $"{nameof(TweetStreamProducer)} failed to get tweet stream, stopping...");
 
                     return;
                 }
@@ -51,7 +55,10 @@ namespace TwitterStreamService
                         if (!string.IsNullOrEmpty(line))
                         {
                             var tweet = JsonConvert.DeserializeObject<Tweet>(line);
-                            Console.WriteLine(tweet?.Data?.Text);
+                            if (tweet != null)
+                            {
+                                await channelWriter.WriteAsync(tweet, cancellationToken);
+                            }
                         }
                         line = await streamReader.ReadLineAsync();
                     }
