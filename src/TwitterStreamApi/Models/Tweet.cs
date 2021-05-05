@@ -2,6 +2,6 @@
 {
     public class Tweet
     {
-        public TweetData? Data { get; set; }
+        public TweetData Data { get; set; } = new TweetData();
     }
 }

@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -20,7 +22,12 @@ namespace TwitterStreamApi.Clients
 
         public async Task<Stream?> GetSampleStreamAsync(CancellationToken cancellationToken = default)
         {
-            var path = @"/2/tweets/sample/stream";
+            var queryParams = new Dictionary<string, string?>()
+            {
+                {"tweet.fields", "entities" },
+            };
+
+            var path = QueryHelpers.AddQueryString(@"/2/tweets/sample/stream", queryParams);
             
             if (httpClient.BaseAddress == null)
             {
