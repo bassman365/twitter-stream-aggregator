@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using TwitterStreamApi.Clients;
-using TwitterStreamApi.Models;
+using TwitterStreamApi.Models.TweetModels;
 
 namespace TwitterStreamApi
 {

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace TwitterStreamApi.Models
+namespace TwitterStreamApi.Models.TweetModels
 {
     public class TweetUrl
     {

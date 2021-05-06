@@ -2,27 +2,23 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TwitterStreamApi.Models.TweetModels;
 
 namespace TwitterStreamApi
 {
     public class TwitterStats 
     {
-        private static int totalTweets = 0;
-        private static int tweetsWithEmojis = 0;
-        private static int tweetsWithUrls = 0;
-        private static DateTime firstTweetDateTimeUtc = new DateTime();
+        private static int totalTweetCount = 0;
+        private static int tweetsWithEmojisCount = 0;
+        private static int tweetsWithUrlsCount = 0;
+        private static int tweetsWithImageUrlsCount = 0;
+        private static DateTime firstTweetDateTimeUtc = new();
         private static readonly ConcurrentDictionary<string, int> emojis = new();
         private static readonly ConcurrentDictionary<string, int> hashtags = new();
+        private static readonly ConcurrentDictionary<string, int> domains = new();
         private static readonly object Instancelock = new();
-        private TwitterStats()
-        {
-
-        }
-
+        private TwitterStats(){}
         private static TwitterStats? instance = null;
-
         public static TwitterStats GetInstance
         {
             get
@@ -41,34 +37,29 @@ namespace TwitterStreamApi
             }
         }
 
-        public static int TotalTweets => totalTweets;
+        public static int TotalTweets => totalTweetCount;
+        //public static int EmojiTweetCount => tweetsWithEmojisCount;
 
         public static void IncrementTweet()
         {
-            if (totalTweets == 0)
+            if (totalTweetCount == 0)
             {
                 firstTweetDateTimeUtc = DateTime.UtcNow;
             }
-            totalTweets++;
+            totalTweetCount++;
         }
-
-        public static int TweetsWithEmojis => tweetsWithEmojis;
         public static void IncrementEmojiTweets()
         {
-            tweetsWithEmojis++;
+            tweetsWithEmojisCount++;
         }
-
-        public static int TweetsWithUrls => tweetsWithUrls;
         public static void IncrementUrlTweets()
         {
-            tweetsWithUrls++;
+            tweetsWithUrlsCount++;
         }
-
-        public static IOrderedEnumerable<KeyValuePair<string, int>> GetTopTweets()
+        public static void IncrementImageUrlTweets()
         {
-            return emojis.OrderByDescending(x => x.Value);
+            tweetsWithImageUrlsCount++;
         }
-
         public static void AddEmoji(string emojiText)
         {
             emojis.AddOrUpdate(emojiText, 1, (key, currentValue) =>
@@ -77,12 +68,6 @@ namespace TwitterStreamApi
                 return currentValue;
             });
         }
-
-        public static IOrderedEnumerable<KeyValuePair<string, int>> GetTopHashtags()
-        {
-            return hashtags.OrderByDescending(x => x.Value);
-        }
-
         public static void AddHashtag(string hashtag)
         {
             hashtags.AddOrUpdate(hashtag, 1, (key, currentValue) =>
@@ -91,12 +76,56 @@ namespace TwitterStreamApi
                 return currentValue;
             });
         }
+        public static void AddDomain(string domain)
+        {
+            domains.AddOrUpdate(domain, 1, (key, currentValue) =>
+            {
+                currentValue++;
+                return currentValue;
+            });
+        }
 
-        public static int AverageTweetsPerHour()
+        public static IEnumerable<KeyValuePair<string, int>> GetTopEmojis(int numberOfElements = 10)
+        {
+            return emojis
+                .OrderByDescending(x => x.Value)
+                .Take(numberOfElements);
+        }
+        public static IEnumerable<KeyValuePair<string, int>> GetTopHashtags(int numberOfElements = 10)
+        {
+            return hashtags
+                .OrderByDescending(x => x.Value)
+                .Take(numberOfElements);
+        }
+        public static IEnumerable<KeyValuePair<string, int>> GetTopDomains(int numberOfElements = 10)
+        {
+            return domains
+                .OrderByDescending(x => x.Value)
+                .Take(numberOfElements);
+        }
+        public static decimal GetUrlPercent()
+        {
+            return (tweetsWithUrlsCount / (decimal)TotalTweets) * 100;
+        }
+        public static decimal GetImageUrlPercent()
+        {
+            return (tweetsWithImageUrlsCount / (decimal)TotalTweets) * 100;
+        }
+
+        public static decimal GetEmojiPercent()
+        {
+            return (tweetsWithEmojisCount / (decimal)TotalTweets) * 100;
+        }
+
+        public static TweetAverages AverageTweets()
         {
             var span = DateTime.UtcNow - firstTweetDateTimeUtc;
-            var hourAvg = (int)(TotalTweets / span.TotalHours);
-            return hourAvg;
+            return new TweetAverages
+            {
+                PerHour = (int)(TotalTweets / span.TotalHours),
+                PerMinute = (int)(TotalTweets / span.TotalMinutes),
+                PerSecond = (int)(TotalTweets / span.TotalSeconds)
+            };
         }
     }
 }

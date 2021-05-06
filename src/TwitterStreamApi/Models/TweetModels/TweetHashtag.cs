@@ -1,4 +1,4 @@
-﻿namespace TwitterStreamApi.Models
+﻿namespace TwitterStreamApi.Models.TweetModels
 {
     public class TweetHashtag
     {
