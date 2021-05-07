@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Net;
 using System.Threading.Tasks;
 using TwitterStreamApi.Dtos;
 using TwitterStreamApi.Repositories;
@@ -24,23 +26,35 @@ namespace TwitterStreamApi.Controllers
         [ProducesResponseType(typeof(TwitterStatsDto), 200)]
         public async Task<IActionResult> Get()
         {
-            var stats = await Task.Run(() =>
+            try
             {
-                return new TwitterStatsDto
+                var stats = await Task.Run(() =>
                 {
-                    Total = statsRepository.TotalTweets,
-                    Averages = statsRepository.GetAverageTweets(),
-                    PercentContainingEmojis = statsRepository.GetEmojiPercentage(),
-                    PercentContainingPhotoUrl = statsRepository.GetPhotoUrlPercentage(),
-                    PercentContainingUrl = statsRepository.GetUrlPercentage(),
-                    TopDomains = statsRepository.GetTopDomains(10),
-                    TopEmojis = statsRepository.GetTopEmojis(10),
-                    TopHashtags = statsRepository.GetTopHashtags(10),
-                    TopCryptos = statsRepository.GetTopCryptos(10),
-                };
-            });
+                    return new TwitterStatsDto
+                    {
+                        Total = statsRepository.TotalTweets,
+                        Averages = statsRepository.GetAverageTweets(),
+                        PercentContainingEmojis = statsRepository.GetEmojiPercentage(),
+                        PercentContainingPhotoUrl = statsRepository.GetPhotoUrlPercentage(),
+                        PercentContainingUrl = statsRepository.GetUrlPercentage(),
+                        TopDomains = statsRepository.GetTopDomains(10),
+                        TopEmojis = statsRepository.GetTopEmojis(10),
+                        TopHashtags = statsRepository.GetTopHashtags(10),
+                        TopCryptos = statsRepository.GetTopCryptos(10),
+                    };
+                });
 
-            return Ok(stats);
+                return Ok(stats);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    $"{nameof(TwitterStreamStatsController)} Get stats route failed: {ex.Message}");
+
+                return StatusCode((int)HttpStatusCode.InternalServerError);
+            }
+
         }
     }
 }

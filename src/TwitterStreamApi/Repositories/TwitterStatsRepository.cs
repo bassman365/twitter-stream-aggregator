@@ -8,16 +8,16 @@ namespace TwitterStreamApi.Repositories
 {
     public class TwitterStatsRepository : ITwitterStatsRepository
     {
-        private static readonly ConcurrentDictionary<string, int> cryptos = new();
-        private static readonly ConcurrentDictionary<string, int> domains = new();
-        private static readonly ConcurrentDictionary<string, int> emojis = new();
-        private static readonly ConcurrentDictionary<string, int> hashtags = new();
-        private static DateTime firstTweetDateTimeUtc = new();
-        private static readonly object syncObject = new();
-        private static int totalTweetCount = 0;
-        private static int tweetsWithEmojisCount = 0;
-        private static int tweetsWithPhotoUrlsCount = 0;
-        private static int tweetsWithUrlsCount = 0;
+        private readonly ConcurrentDictionary<string, int> cryptos = new();
+        private readonly ConcurrentDictionary<string, int> domains = new();
+        private readonly ConcurrentDictionary<string, int> emojis = new();
+        private readonly ConcurrentDictionary<string, int> hashtags = new();
+        private DateTime firstTweetDateTimeUtc = new();
+        private readonly object syncObject = new();
+        private int totalTweetCount = 0;
+        private int tweetsWithEmojisCount = 0;
+        private int tweetsWithPhotoUrlsCount = 0;
+        private int tweetsWithUrlsCount = 0;
         public int TotalTweets => totalTweetCount;
 
         public void AddCrypto(string crypto)

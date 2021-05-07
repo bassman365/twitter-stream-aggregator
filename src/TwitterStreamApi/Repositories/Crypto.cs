@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TwitterStreamApi.Services.TweetProcessing
+namespace TwitterStreamApi.Repositories
 {
     public static class Crypto
     {

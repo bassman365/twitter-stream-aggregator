@@ -14,6 +14,5 @@ namespace TwitterStreamApi.Dtos
         public IEnumerable<KeyValuePair<string, int>> TopEmojis { get; set; } = new Dictionary<string, int>();
         public IEnumerable<KeyValuePair<string, int>> TopHashtags { get; set; } = new Dictionary<string, int>();
         public IEnumerable<KeyValuePair<string, int>> TopCryptos { get; set; } = new Dictionary<string, int>();
-
     }
 }

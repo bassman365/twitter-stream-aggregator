@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TwitterStreamApi.Models.TweetModels;
+using TwitterStreamApi.Repositories;
 
 namespace TwitterStreamApi.Services.TweetProcessing
 {

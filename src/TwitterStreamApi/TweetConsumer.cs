@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -28,7 +27,7 @@ namespace TwitterStreamApi
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            logger.LogInformation($"{nameof(TweetConsumer)} consuming...");
+            logger.LogInformation($"{nameof(TweetConsumer)} consuming tweets...");
             await Task.Run(() => Parallel.For(
                 0,
                 16,
