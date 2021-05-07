@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using System.Threading.Channels;
 using TwitterStreamApi.Clients;
 using TwitterStreamApi.Models.TweetModels;
+using TwitterStreamApi.Repositories;
 using TwitterStreamApi.Services.TweetProcessing;
 
 namespace TwitterStreamApi
@@ -37,6 +38,7 @@ namespace TwitterStreamApi
             services.AddSingleton<TweetStreamProducer>();
             services.AddTransient<ITweetParser, TweetParser>();
             services.AddTransient<ITweetProcessor, TweetProcessor>();
+            services.AddSingleton<ITwitterStatsRepository, TwitterStatsRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

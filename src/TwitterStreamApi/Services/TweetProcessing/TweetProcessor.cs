@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TwitterStreamApi.Models.TweetModels;
+using TwitterStreamApi.Repositories;
 
 namespace TwitterStreamApi.Services.TweetProcessing
 {
@@ -9,51 +11,89 @@ namespace TwitterStreamApi.Services.TweetProcessing
     {
         private readonly ILogger<TweetProcessor> logger;
         private readonly ITweetParser tweetParser;
+        private readonly ITwitterStatsRepository statsRepository;
+
         public TweetProcessor(
-            ILogger<TweetProcessor> logger, 
-            ITweetParser tweetParser)
+            ILogger<TweetProcessor> logger,
+            ITweetParser tweetParser,
+            ITwitterStatsRepository statsRepository)
         {
             this.logger = logger;
             this.tweetParser = tweetParser;
+            this.statsRepository = statsRepository;
         }
 
-        public ValueTask Process(Tweet tweet)
+        public async Task ProcessAsync(Tweet tweet)
         {
-            TwitterStats.IncrementTweet();
+            await Task.Run(() =>
+            {
+                try
+                {
+                    statsRepository.IncrementTweetCount();
+                    ProcessEmojis(tweet);
+                    ProcessHashtags(tweet);
+                    ProcessUrls(tweet);
+                    ProcessCryptos(tweet);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(
+                        ex,
+                        $"{nameof(TweetProcessor)} failed to process tweet: {tweet.Data.Text}");
+                }
+            });
+        }
 
+        private void ProcessEmojis(Tweet tweet)
+        {
             var emojis = tweetParser.GetEmojis(tweet);
             if (emojis.Any())
             {
-                TwitterStats.IncrementEmojiTweets();
+                statsRepository.IncrementEmojiTweetCount();
                 foreach (var emoji in emojis)
                 {
-                    TwitterStats.AddEmoji(emoji);
+                    statsRepository.AddEmoji(emoji);
                 }
             }
+        }
 
+        private void ProcessHashtags(Tweet tweet)
+        {
             var hashtags = tweetParser.GetHashtags(tweet);
-
             foreach (var hashtag in hashtags)
             {
-                TwitterStats.AddHashtag(hashtag);
+                statsRepository.AddHashtag(hashtag);
+            }
+        }
+
+        private void ProcessUrls(Tweet tweet)
+        {
+            var uris = tweetParser.GetUris(tweet);
+            if (tweetParser.ContainsPhotoUrls(uris))
+            {
+                statsRepository.IncrementPhotoUrlTweetCount();
             }
 
-            var urls = tweetParser.GetUris(tweet);
-            if (tweetParser.ContainsImageUrls(urls))
+            if (uris.Any())
             {
-                TwitterStats.IncrementImageUrlTweets();
-            }
-
-            if (urls.Any())
-            {
-                TwitterStats.IncrementUrlTweets();
-                foreach (var url in urls)
+                statsRepository.IncrementUrlTweetCount();
+                foreach (var uri in uris)
                 {
-                    TwitterStats.AddDomain(url.Host);
+                    statsRepository.AddDomain(uri.Host);
                 }
             }
+        }
 
-            return new ValueTask();
+        private void ProcessCryptos(Tweet tweet)
+        {
+            var cryptos = tweetParser.GetCryptos(tweet);
+            if (cryptos.Any())
+            {
+                foreach (var crypto in cryptos)
+                {
+                    statsRepository.AddCrypto(crypto);
+                }
+            }
         }
     }
 }

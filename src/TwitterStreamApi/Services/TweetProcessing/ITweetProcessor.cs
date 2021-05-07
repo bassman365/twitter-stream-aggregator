@@ -5,6 +5,6 @@ namespace TwitterStreamApi.Services.TweetProcessing
 {
     public interface ITweetProcessor
     {
-        ValueTask Process(Tweet tweet);
+        Task ProcessAsync(Tweet tweet);
     }
 }

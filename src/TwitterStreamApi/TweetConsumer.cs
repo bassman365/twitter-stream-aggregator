@@ -44,7 +44,7 @@ namespace TwitterStreamApi
             while (!cancellationToken.IsCancellationRequested)
             {
                 var tweet = await channelReader.ReadAsync(cancellationToken);
-                await tweetProcessor.Process(tweet);
+                await tweetProcessor.ProcessAsync(tweet);
                 if (channelReader.Count > QueueThreshold)
                 {
                     logger

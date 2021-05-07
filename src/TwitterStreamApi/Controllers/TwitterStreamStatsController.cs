@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using TwitterStreamApi.Dtos;
+using TwitterStreamApi.Repositories;
 
 namespace TwitterStreamApi.Controllers
 {
@@ -10,10 +11,13 @@ namespace TwitterStreamApi.Controllers
     public class TwitterStreamStatsController : ControllerBase
     {
         private readonly ILogger<TwitterStreamStatsController> logger;
+        private readonly ITwitterStatsRepository statsRepository;
         public TwitterStreamStatsController(
-            ILogger<TwitterStreamStatsController> logger)
+            ILogger<TwitterStreamStatsController> logger,
+            ITwitterStatsRepository statsRepository)
         {
             this.logger = logger;
+            this.statsRepository = statsRepository;
         }
 
         [HttpGet]
@@ -24,14 +28,15 @@ namespace TwitterStreamApi.Controllers
             {
                 return new TwitterStatsDto
                 {
-                    Averages = TwitterStats.AverageTweets(),
-                    PercentContainingEmojis = TwitterStats.GetEmojiPercent(),
-                    ImageUrlPercent = TwitterStats.GetImageUrlPercent(),
-                    TopDomains = TwitterStats.GetTopDomains(10),
-                    TopEmojis = TwitterStats.GetTopEmojis(10),
-                    TopHashtags = TwitterStats.GetTopHashtags(10),
-                    Total = TwitterStats.TotalTweets,
-                    UrlPercent = TwitterStats.GetUrlPercent()
+                    Total = statsRepository.TotalTweets,
+                    Averages = statsRepository.GetAverageTweets(),
+                    PercentContainingEmojis = statsRepository.GetEmojiPercentage(),
+                    PercentContainingPhotoUrl = statsRepository.GetPhotoUrlPercentage(),
+                    PercentContainingUrl = statsRepository.GetUrlPercentage(),
+                    TopDomains = statsRepository.GetTopDomains(10),
+                    TopEmojis = statsRepository.GetTopEmojis(10),
+                    TopHashtags = statsRepository.GetTopHashtags(10),
+                    TopCryptos = statsRepository.GetTopCryptos(10),
                 };
             });
 

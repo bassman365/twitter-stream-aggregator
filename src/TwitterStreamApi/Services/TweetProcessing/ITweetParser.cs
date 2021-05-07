@@ -12,6 +12,8 @@ namespace TwitterStreamApi.Services.TweetProcessing
 
         public IEnumerable<Uri> GetUris(Tweet tweet);
 
-        bool ContainsImageUrls(IEnumerable<Uri> uris);
+        bool ContainsPhotoUrls(IEnumerable<Uri> uris);
+
+        public IEnumerable<string> GetCryptos(Tweet tweet);
     }
 }
