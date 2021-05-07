@@ -101,8 +101,7 @@ namespace TwitterStreamApi.Services.TweetProcessing
 
             foreach (var coin in Crypto.Coins.Values)
             {
-                if (text.Contains(coin, StringComparison.OrdinalIgnoreCase) && 
-                    text.Contains("coin", StringComparison.OrdinalIgnoreCase))
+                if (text.Contains(coin, StringComparison.OrdinalIgnoreCase))
                 {
                     cryptos.Add(coin);
                 }

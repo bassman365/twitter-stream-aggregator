@@ -47,6 +47,9 @@ namespace TwitterStreamApi.Tests
             mockStatsRepository
                 .Setup(x => x.AddHashtag(It.IsAny<string>()))
                 .Verifiable();
+            mockStatsRepository
+                .Setup(x => x.AddCrypto(It.IsAny<string>()))
+                .Verifiable();
         }
 
         [TestMethod]
@@ -168,6 +171,27 @@ namespace TwitterStreamApi.Tests
             mockStatsRepository.Verify(x => x.AddDomain(uris[0].Host), Times.Once);
             mockStatsRepository.Verify(x => x.AddDomain(uris[1].Host), Times.Once);
             mockStatsRepository.Verify(x => x.AddDomain(uris[2].Host), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task TweetProcessor_ProcessAsync_AddsCrypto_WhenCryptossArePresent()
+        {
+            var coins = new string[]
+            {
+                "Bitcoin",
+                "Ethereum",
+                "Dogecoin"
+            };
+
+            mockTweetParser
+                .Setup(x => x.GetCryptos(It.IsAny<Tweet>()))
+                .Returns(coins);
+
+            await tweetProcessor.ProcessAsync(new Tweet());
+
+            mockStatsRepository.Verify(x => x.AddCrypto(coins[0]), Times.Once);
+            mockStatsRepository.Verify(x => x.AddCrypto(coins[1]), Times.Once);
+            mockStatsRepository.Verify(x => x.AddCrypto(coins[2]), Times.Once);
         }
 
         [TestMethod]

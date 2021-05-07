@@ -110,6 +110,16 @@ namespace TwitterStreamApi.Tests
             result.Should().BeEquivalentTo(expectedEmojis);
         }
 
+        [TestMethod]
+        public void TweetParser_GetCryptos_ReturnsExpectedCryptos_WhenCryptosArePresent()
+        {
+            var tweet = new Tweet();
+            tweet.Data.Text = "bitcoin, ethereum, and dogecoin oh my!";
+            var expectedCoins = new List<string>() { "Bitcoin", "Ethereum", "Dogecoin" };
+            var result = tweetParser.GetCryptos(tweet);
+            result.Should().BeEquivalentTo(expectedCoins);
+        }
+
         private static IEnumerable<string> GetTestUrls()
         {
             return new List<string>()
